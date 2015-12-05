@@ -43,6 +43,7 @@
 			}
 
 			fixed noise (fixed _x) {
+			
 			    fixed i = floor(_x);  // integer
 				fixed f = frac(_x);  // fraction
 				fixed y = lerp(random(i), random(i + 1.0), smoothstep(0.,1.,f));

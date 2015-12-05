@@ -44,7 +44,6 @@
 			
 			st += fixed2 (0.5, 0.5);
 			st = mul (st, rotate (distance (st, fixed2 (0.5, 0.5)) * (sin (_Timer * _DeformSpeed) * _DeformRange))) ;
-//			st = mul (st, rotate (distance (st, fixed2 (0.5, 0.5)) * (_Timer * _DeformSpeed))) ;
 			st -= fixed2 (0.5, 0.5);
 
 			fixed4 c = tex2D (_MainTex, st) * _Color;
