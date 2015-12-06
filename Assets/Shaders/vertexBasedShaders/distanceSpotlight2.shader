@@ -2,13 +2,12 @@
 	Properties {
 		_Color ("Color", Color) = (1.0, 0.0, 0.0, 1.0)
 		_Cutoff ("Distance Cutoff", Float) = 15
-		_MainTex ("Albedo (RGB)", 2D) = "white" {}
+		MainTex ("Albedo (RGB)", 2D) = "white" {}
 		_WaveHeight ("Wave Height", Float) = 1.0
 		_WaveFreq ("Wave Frequency", Float) = 5.0
-		_AnimationRange ("AnimationRange", Float) = 50
-		_AnimationSpeed ("AnimationRange", Float) = .1
-//		_YScale ("Scaling", Float) = 10
-//		_YSpeed ("Speed", Float) = .2		
+		_AnimationRange ("Animation Range", Float) = 50
+		_AnimationSpeed ("Animation Spedd", Float) = .1
+
 	}
 //	SubShader {
 //		Tags { "RenderType"="Opaque" }
@@ -112,7 +111,7 @@
 		
 		CGPROGRAM
         #pragma surface surf Standard fullforwardshadows vertex:vert
-		
+		#pragma target 3.0
 		#define PI 3.14159265358979323846
 
 			
@@ -175,8 +174,9 @@
 		    return c.z * lerp( fixed3(1,1,1), rgb, c.y);
 		}
 		
-		uniform sampler2D _MainTex;
-		float4 _MainTex_ST;
+		uniform sampler2D MainTex;
+		float4 MainTex_ST;
+		// float4 _MainTex2_ST;
 		uniform fixed4 _Color;
 		uniform fixed _Cutoff;
 		uniform fixed _Timer;
@@ -186,8 +186,9 @@
 		uniform float _AnimationSpeed;
         
         struct Input {
+			// fixed4 tex;
 			float2 uv_MainTex;
-			float dist;
+			// float dist;
 			float4 vertex;
 		};
 		void vert (inout appdata_full v, out Input o) {
@@ -198,22 +199,27 @@
 //				fixed4 newVerts = mul(UNITY_MATRIX_MV, o.vertex);
 				float dist = _AnimationRange - distance(_WorldSpaceCameraPos, mul(_Object2World, v.vertex));
 				dist = max (dist, 0);
-				
+				// o.dist = dist;
 				
 				
 				o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
 				
-				fixed4 newVerts = mul(UNITY_MATRIX_MV, v.vertex);
-//				o.vertex += float4 (0, (abs (sin ((_Time.y * _WaveFreq + _Phase) + o.vertex.x + o.vertex.z) * _WaveHeight)) * dist, 0,0);
-				o.vertex += float4 (0, (noise (float2 (newVerts.x, newVerts.z) *(_Time.y * _AnimationSpeed)) * _WaveHeight) * dist, 0, 0);
+// 				fixed4 newVerts = mul(UNITY_MATRIX_MV, v.vertex);
+// //				o.vertex += float4 (0, (abs (sin ((_Time.y * _WaveFreq + _Phase) + o.vertex.x + o.vertex.z) * _WaveHeight)) * dist, 0,0);				
+// 				o.vertex += float4 (0, (noise (float2 (newVerts.x, newVerts.z) * (_Time.y * _AnimationSpeed)) * _WaveHeight) * dist, 0, 0);
 				
-				o.uv_MainTex = TRANSFORM_TEX(v.texcoord, _MainTex);
+
+				o.uv_MainTex = TRANSFORM_TEX(v.texcoord, MainTex);
+				
+				// _MainTex_ST = TRANSFORM_TEX(v.texcoord, _MainTex);
+				// o.tex = tex2D(_MainTex, o.uv_MainTex);
 //				UNITY_TRANSFER_FOG(o,o.vertex);
 //				return o;
 			
       	}
 		void surf (Input IN, inout SurfaceOutputStandard o) {
-			fixed2 st = IN.uv_MainTex;
+			// fixed2 st = IN.uv_MainTex;
+			// fixed2 st = _MainTex_ST;
 			
 			
 			
@@ -224,18 +230,25 @@
 
 			
 
-//			fixed4 c = tex2D (_MainTex, st) * IN.dist;
+			
 //			fixed4 c = _Color * (1 - (IN.dist / _Cutoff));
 //			fixed4 c = _Color * IN.dist;
-			fixed newVal = remap (IN.dist, 0, 25, 0, 1);
-			
+			// fixed newVal = remap (IN.dist, 0, 25, 0, 1);
+			// fixed4 c = tex2D (_MainTex, st) * IN.dist;
 //			fixed3 c = hsb2rgb (fixed3 (noise (_Time.y * st) * 20, 1, 1 - newVal));
-			fixed3 c = fixed3 (1,0,0);
-//			fixed3 c = fixed3 (st.x, 0, 0);
+			
+			// fixed3 c = fixed3 (1,0,0);
+			// fixed4 c = tex2D (_MainTex, st) * IN.dist;
+			// fixed4 c = tex2D(_MainTex, st);
+
+			// fixed3 c = fixed3 (st.x, 0, 0);
 			
 //			fixed4 c = _Color;
 			
-			o.Albedo = c;
+			// o.Albedo = c;
+			o.Albedo = tex2D(MainTex, IN.uv_MainTex);
+			// o.Albedo = tex2D(_MainTex, _MainTex_ST.xy);
+			// o.Albedo = fixed3 (1,0,0);
 			
 			// Metallic and smoothness come from slider variables
 			o.Metallic = 0;
