@@ -2,7 +2,7 @@
 	Properties {
 		_Color ("Color", Color) = (1.0, 0.0, 0.0, 1.0)
 		_Cutoff ("Distance Cutoff", Float) = 15
-		MainTex ("Albedo (RGB)", 2D) = "white" {}
+		_MainTex ("Albedo (RGB)", 2D) = "white" {}
 		_WaveHeight ("Wave Height", Float) = 1.0
 		_WaveFreq ("Wave Frequency", Float) = 5.0
 		_AnimationRange ("Animation Range", Float) = 50
@@ -174,8 +174,8 @@
 		    return c.z * lerp( fixed3(1,1,1), rgb, c.y);
 		}
 		
-		uniform sampler2D MainTex;
-		float4 MainTex_ST;
+		uniform sampler2D _MainTex;
+		// float4 MainTex_ST;
 		// float4 _MainTex2_ST;
 		uniform fixed4 _Color;
 		uniform fixed _Cutoff;
@@ -187,29 +187,25 @@
         
         struct Input {
 			// fixed4 tex;
-			float2 uv_MainTex;
+			float2 uv_MainTex : TEXCOORD0;
+			float2 uv;
 			// float dist;
-			float4 vertex;
+			// float4 vertex : SV_POSITION;
 		};
 		void vert (inout appdata_full v, out Input o) {
-//				float dist = max (_AnimationRange - distance(_WorldSpaceCameraPos, mul(_Object2World, v.vertex)), 0);
-//				o.dist = dist;
-//				fixed newVal = remap (o.dist, 0, 50, 0, 1);				
-//				o.vertex += float4 (0, (noise (float2 (newVerts.x, newVerts.z) *(_Time.y * _AnimationSpeed)) * _WaveHeight) * dist, 0, 0);
-//				fixed4 newVerts = mul(UNITY_MATRIX_MV, o.vertex);
 				float dist = _AnimationRange - distance(_WorldSpaceCameraPos, mul(_Object2World, v.vertex));
 				dist = max (dist, 0);
-				// o.dist = dist;
-				
-				
-				o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
-				
-// 				fixed4 newVerts = mul(UNITY_MATRIX_MV, v.vertex);
-// //				o.vertex += float4 (0, (abs (sin ((_Time.y * _WaveFreq + _Phase) + o.vertex.x + o.vertex.z) * _WaveHeight)) * dist, 0,0);				
-// 				o.vertex += float4 (0, (noise (float2 (newVerts.x, newVerts.z) * (_Time.y * _AnimationSpeed)) * _WaveHeight) * dist, 0, 0);
-				
 
-				o.uv_MainTex = TRANSFORM_TEX(v.texcoord, MainTex);
+				// v.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
+				// o.vertex.y += 10;
+				
+				fixed4 newVerts = mul(UNITY_MATRIX_MV, v.vertex);
+//				// o.vertex += float4 (0, (abs (sin ((_Time.y * _WaveFreq + _Phase) + o.vertex.x + o.vertex.z) * _WaveHeight)) * dist, 0,0);				
+				v.vertex += float4 (0, (noise (float2 (newVerts.x, newVerts.z) * (_Time.y * _AnimationSpeed)) * _WaveHeight) * dist, 0, 0);
+				// v.vertex.y += 10;
+
+				// o.uv = TRANSFORM_TEX(v.texcoord, _MainTex);
+				o.uv = TRANSFORM_UV(0);
 				
 				// _MainTex_ST = TRANSFORM_TEX(v.texcoord, _MainTex);
 				// o.tex = tex2D(_MainTex, o.uv_MainTex);
@@ -218,9 +214,9 @@
 			
       	}
 		void surf (Input IN, inout SurfaceOutputStandard o) {
-			// fixed2 st = IN.uv_MainTex;
+			fixed2 st = IN.uv_MainTex;
 			// fixed2 st = _MainTex_ST;
-			
+			// fixed2 st = IN.uv;
 			
 			
 //			st += fixed2 (0.5, 0.5);
@@ -246,7 +242,8 @@
 //			fixed4 c = _Color;
 			
 			// o.Albedo = c;
-			o.Albedo = tex2D(MainTex, IN.uv_MainTex);
+			// o.Albedo = tex2D(_MainTex, st) - fixed3 (.2,.2,.2);
+			o.Albedo = tex2D(_MainTex, st);
 			// o.Albedo = tex2D(_MainTex, _MainTex_ST.xy);
 			// o.Albedo = fixed3 (1,0,0);
 			
