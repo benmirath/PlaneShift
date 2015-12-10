@@ -1,4 +1,4 @@
-﻿Shader "Custom/VertexManipulation/vertexProximitySpikes" {
+﻿Shader "Custom/VertexManipulation/slowRiseSpikes" {
 	Properties {
 		_Color ("Color", Color) = (1.0, 0.0, 0.0, 1.0)
 		_Cutoff ("Distance Cutoff", Float) = 15
@@ -92,15 +92,21 @@
 		};
 		void vert (inout appdata_full v, out Input o) {
 			float dist = _AnimationRange - distance(_WorldSpaceCameraPos, mul(_Object2World, v.vertex));
+			// float dist = distance(_WorldSpaceCameraPos, mul(_Object2World, v.vertex));
 			// float dist = _AnimationRange - distance(_WorldSpaceCameraPos.xyz, v.vertex);
 			// float dist = _AnimationRange - _WorldSpaceCameraPos.xyz;
 			// dist *= step (0, dist);
-			dist = max (dist, 0);
-			// dist = clamp (dist, 0, -15);
+			// dist = min (dist, _AnimationRange);
+			// dist = min (dist, 0);
+			dist = clamp (dist, -15, 0);
 
 			// fixed4 newVerts = mul(UNITY_MATRIX_MV, v.vertex);
 			fixed4 newVerts = mul(_Object2World, v.vertex);
-			fixed adj = (noise (float2 (newVerts.x, newVerts.z) * (_Time.y * _AnimationSpeed)) * _WaveHeight) * dist;
+			// fixed adj = (noise (float2 (newVerts.x, newVerts.z) * (_Time.y * _AnimationSpeed)) * _WaveHeight) * dist;
+			// fixed adj = (noise (float2 (newVerts.x, newVerts.z) * (((abs (sin (_Time.y)) + 10) * (abs(cos (_Time.y)) + 10)) * _AnimationSpeed)) * _WaveHeight) * dist;
+			// fixed adj = (noise (float2 (newVerts.x, newVerts.z)) * _WaveHeight) * dist;
+			fixed adj = (noise (float2 (newVerts.x, newVerts.z)) * (_WaveHeight * _Time.y) * _AnimationSpeed) * dist;
+			
 			adj *= step (adj, 2.5);		//use this to cutoff some of the spike generation
 			v.vertex += float4 (0, adj, 0, 0);
 			o.uv_MainTex = TRANSFORM_UV(0);

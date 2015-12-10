@@ -1,4 +1,4 @@
-﻿Shader "Custom/VertexManipulation/vertexProximitySpikes" {
+﻿Shader "Custom/distanceHighlight4" {
 	Properties {
 		_Color ("Color", Color) = (1.0, 0.0, 0.0, 1.0)
 		_Cutoff ("Distance Cutoff", Float) = 15
@@ -8,17 +8,21 @@
 		_AnimationRange ("Animation Range", Float) = 50
 		_AnimationSpeed ("Animation Spedd", Float) = .1
 
-	}
-	
+	}	
 	SubShader {
 		Tags { "RenderType"="Opaque" }
 		LOD 200
 		
 		CGPROGRAM
-		#pragma surface surf Standard fullforwardshadows vertex:vert addshadow 
+		// #pragma surface surf Standard fullforwardshadows vertex:vert
+        // #pragma surface surf Standard vertex:vert addshadow
+		#pragma surface surf Standard fullforwardshadows vertex:vert addshadow
+		// #pragma surface surf Lambert vertex:vert addshadow
+ 
 		#pragma target 3.0
 		#define PI 3.14159265358979323846
 
+			
 		//RANDOM & NOISE
 		half random (fixed _x) { return frac(sin(_x)*100000.0); }
 		half random (in fixed2 _st) { return frac(sin(dot(_st.xy, fixed2(12.9898,78.233))) * 43758.5453123); }
@@ -79,6 +83,8 @@
 		}
 		
 		uniform sampler2D _MainTex;
+		// float4 MainTex_ST;
+		// float4 _MainTex2_ST;
 		uniform fixed4 _Color;
 		uniform fixed _Cutoff;
 		uniform fixed _Timer;
@@ -89,21 +95,18 @@
         
         struct Input {
 			float2 uv_MainTex : TEXCOORD0;
+			float2 uv;
 		};
 		void vert (inout appdata_full v, out Input o) {
-			float dist = _AnimationRange - distance(_WorldSpaceCameraPos, mul(_Object2World, v.vertex));
-			// float dist = _AnimationRange - distance(_WorldSpaceCameraPos.xyz, v.vertex);
-			// float dist = _AnimationRange - _WorldSpaceCameraPos.xyz;
-			// dist *= step (0, dist);
-			dist = max (dist, 0);
-			// dist = clamp (dist, 0, -15);
+				float dist = _AnimationRange - distance(_WorldSpaceCameraPos, mul(_Object2World, v.vertex));
+				dist = max (dist, 0);
+				// dist = clamp (dist, 0, -15);
 
-			// fixed4 newVerts = mul(UNITY_MATRIX_MV, v.vertex);
-			fixed4 newVerts = mul(_Object2World, v.vertex);
-			fixed adj = (noise (float2 (newVerts.x, newVerts.z) * (_Time.y * _AnimationSpeed)) * _WaveHeight) * dist;
-			adj *= step (adj, 2.5);		//use this to cutoff some of the spike generation
-			v.vertex += float4 (0, adj, 0, 0);
-			o.uv_MainTex = TRANSFORM_UV(0);
+				fixed4 newVerts = mul(UNITY_MATRIX_MV, v.vertex);				
+				v.vertex += float4 (0, (noise (float2 (newVerts.x, newVerts.z) * (_Time.y * _AnimationSpeed)) * _WaveHeight) * dist, 0, 0);
+
+				o.uv = TRANSFORM_UV(0);
+			
       	}
 		void surf (Input IN, inout SurfaceOutputStandard o) {
 			fixed2 st = IN.uv_MainTex;

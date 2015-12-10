@@ -1,4 +1,4 @@
-﻿Shader "Custom/VertexManipulation/vertexProximitySpikes" {
+﻿Shader "Custom/VertexManipulation/dropAwayTiles" {
 	Properties {
 		_Color ("Color", Color) = (1.0, 0.0, 0.0, 1.0)
 		_Cutoff ("Distance Cutoff", Float) = 15
@@ -56,6 +56,121 @@
 		                 lerp( dot( random2(i + fixed2(0.0,1.0) ), f - fixed2(0.0,1.0) ), 
 		                       dot( random2(i + fixed2(1.0,1.0) ), f - fixed2(1.0,1.0) ), u.x), u.y);
 		}
+		
+		// fixed3 simplexGrid (vec2 st) {
+		// 	vec3 xyz = vec3(0.0);
+		
+		// 	vec2 p = fract(skew(st));
+		// 	if (p.x > p.y) {
+		// 		xyz.xy = 1.0-vec2(p.x,p.y-p.x);
+		// 		xyz.z = p.y;
+		// 	} else {
+		// 		xyz.yz = 1.0-vec2(p.x-p.y,p.y);
+		// 		xyz.x = p.x;
+		// 	}
+		
+		// 	return fract(xyz);
+		// }
+		// float snoise(fixed3 p) {
+		
+		// 	fixed3 s = floor(p + dot(p, vec3(F3)));
+		// 	fixed3 x = p - s + dot(s, vec3(G3));
+		
+		// 	fixed3 e = step(vec3(0.0), x - x.yzx);
+		// 	fixed3 i1 = e*(1.0 - e.zxy);
+		// 	fixed3 i2 = 1.0 - e.zxy*(1.0 - e);
+		
+		// 	vec3 x1 = x - i1 + G3;
+		// 	vec3 x2 = x - i2 + 2.0*G3;
+		// 	vec3 x3 = x - 1.0 + 3.0*G3;
+		
+		// 	vec4 w, d;
+		
+		// 	w.x = dot(x, x);
+		// 	w.y = dot(x1, x1);
+		// 	w.z = dot(x2, x2);
+		// 	w.w = dot(x3, x3);
+		
+		// 	w = max(0.6 - w, 0.0);
+		
+		// 	d.x = dot(random3(s), x);
+		// 	d.y = dot(random3(s + i1), x1);
+		// 	d.z = dot(random3(s + i2), x2);
+		// 	d.w = dot(random3(s + 1.0), x3);
+		
+		// 	w *= w;
+		// 	w *= w;
+		// 	d *= w;
+		
+		// 	return dot(d, vec4(52.0));
+		// }
+		#define NOISE_SIMPLEX_1_DIV_289 0.00346020761245674740484429065744f
+		float mod289(float x) { return x - floor(x * NOISE_SIMPLEX_1_DIV_289) * 289.0; }
+		float2 mod289(float2 x) { return x - floor(x * NOISE_SIMPLEX_1_DIV_289) * 289.0; }
+		float3 mod289(float3 x) { return x - floor(x * NOISE_SIMPLEX_1_DIV_289) * 289.0; }
+		float4 mod289(float4 x) { return x - floor(x * NOISE_SIMPLEX_1_DIV_289) * 289.0; }
+		
+		float permute(float x) { return mod289(x*x*34.0 + x); }
+		float3 permute(float3 x) { return mod289(x*x*34.0 + x); }
+		float4 permute(float4 x) { return mod289(x*x*34.0 + x); }
+
+		fixed snoise(fixed2 v) {
+			// Precompute values for skewed triangular grid
+			const float4 C = fixed4(0.211324865405187,
+								// (3.0-sqrt(3.0))/6.0
+								0.366025403784439,  
+								// 0.5*(sqrt(3.0)-1.0)
+								-0.577350269189626,  
+								// -1.0 + 2.0 * C.x
+								0.024390243902439); 
+								// 1.0 / 41.0
+		
+			// First corner (x0)
+			fixed2 i  = floor(v + dot(v, C.yy));
+			fixed2 x0 = v - i + dot(i, C.xx);
+		
+			// Other two corners (x1, x2)
+			fixed2 i1 = fixed2(0.0);
+			i1 = (x0.x > x0.y) ? fixed2(1.0, 0.0) : fixed2(0.0, 1.0);
+			fixed2 x1 = x0.xy + C.xx - i1;
+			fixed2 x2 = x0.xy + C.zz;
+		
+			// Do some permutations to avoid
+			// truncation effects in permutation
+			i = mod289(i);
+			fixed3 p = permute(
+					permute( i.y + fixed3(0.0, i1.y, 1.0))
+						+ i.x + fixed3(0.0, i1.x, 1.0 ));
+		
+			fixed3 m = max(0.5 - fixed3(
+								dot(x0,x0), 
+								dot(x1,x1), 
+								dot(x2,x2)
+								), 0.0);
+		
+			m = m*m ;
+			m = m*m ;
+		
+			// Gradients: 
+			//  41 pts uniformly over a line, mapped onto a diamond
+			//  The ring size 17*17 = 289 is close to a multiple 
+			//      of 41 (41*7 = 287)
+		
+			fixed3 x = 2.0 * frac(p * C.www) - 1.0;
+			fixed3 h = abs(x) - 0.5;
+			fixed3 ox = floor(x + 0.5);
+			fixed3 a0 = x - ox;
+		
+			// Normalise gradients implicitly by scaling m
+			// Approximation of: m *= inversesqrt(a0*a0 + h*h);
+			m *= 1.79284291400159 - 0.85373472095314 * (a0*a0+h*h);
+		
+			// Compute final noise value at P
+			fixed3 g = fixed3(0.0);
+			g.x  = a0.x  * x0.x  + h.x  * x0.y;
+			g.yz = a0.yz * fixed2(x1.x,x2.x) + h.yz * fixed2(x1.y,x2.y);
+			return 130.0 * dot(m, g);
+		}
         
         fixed2x2 scale (fixed2 f) { return fixed2x2 ( fixed2 (f.x, 0.0), fixed2 (0.0, f.y)); }
 		fixed2x2 translate (fixed2 f) { return fixed2x2 ( fixed2 (0.0, 1.0), fixed2 (f.x, f.y) ); }
@@ -89,16 +204,12 @@
         
         struct Input {
 			float2 uv_MainTex : TEXCOORD0;
+			fixed2 tileUV;
 		};
 		void vert (inout appdata_full v, out Input o) {
 			float dist = _AnimationRange - distance(_WorldSpaceCameraPos, mul(_Object2World, v.vertex));
-			// float dist = _AnimationRange - distance(_WorldSpaceCameraPos.xyz, v.vertex);
-			// float dist = _AnimationRange - _WorldSpaceCameraPos.xyz;
-			// dist *= step (0, dist);
-			dist = max (dist, 0);
-			// dist = clamp (dist, 0, -15);
+			dist = min (dist, 0);
 
-			// fixed4 newVerts = mul(UNITY_MATRIX_MV, v.vertex);
 			fixed4 newVerts = mul(_Object2World, v.vertex);
 			fixed adj = (noise (float2 (newVerts.x, newVerts.z) * (_Time.y * _AnimationSpeed)) * _WaveHeight) * dist;
 			adj *= step (adj, 2.5);		//use this to cutoff some of the spike generation
@@ -107,7 +218,9 @@
       	}
 		void surf (Input IN, inout SurfaceOutputStandard o) {
 			fixed2 st = IN.uv_MainTex;
+			
 			o.Albedo = tex2D(_MainTex, st);
+			
 			o.Metallic = 0;
 			o.Smoothness = 0;
 			o.Alpha = 1;

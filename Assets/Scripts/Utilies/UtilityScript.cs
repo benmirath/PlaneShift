@@ -8,14 +8,15 @@ public static class UtilityScript {
 
 }
 
-public class ObjectPool<T> where T : MonoBehaviour{
+// public class ObjectPool<T> where T : MonoBehaviour{
+public class ObjectPool<T> where T : Component {
 	public ObjectPool (T prefabObj) {
 		objectPrefab = prefabObj;
 	}
 	
-	static T objectPrefab;
-	static List<T> objectPool = new List<T> ();
-	static T SpawnRoom (Vector3 pos) {
+	T objectPrefab;
+	List<T> objectPool = new List<T> ();
+	public T SpawnFromPool (Vector3 pos = default(Vector3)) {
 		if (objectPrefab == null) return null;
 		T returnObj = null;
 		for (int i = 0; i < objectPool.Count; i++) {

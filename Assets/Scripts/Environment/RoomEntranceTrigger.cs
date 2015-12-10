@@ -1,19 +1,17 @@
 ﻿using UnityEngine;
-using System.Collections;
 
+[RequireComponent(typeof(BoxCollider))]
 public class RoomEntranceTrigger : MonoBehaviour {
 	public delegate void PlayerEnteredRoom (RoomEntranceTrigger trigger);
 	public static event PlayerEnteredRoom OnPlayerEnteredRoom;
-//	Room owningRoom
-	// Use this for initialization
-//	void Start () {
-//	
-//	}
-//	
-//	// Update is called once per frame
-//	void Update () {
-//	
-//	}
+
+	void Awake () {
+		BoxCollider coll = GetComponent<BoxCollider> ();
+		if (coll != null) {
+			coll.isTrigger = true;
+			coll.size = new Vector3 (20, 20, 20);
+		}
+	}
 
 	void OnTriggerEnter (Collider hit) {
 		if (hit.CompareTag ("Player")) {

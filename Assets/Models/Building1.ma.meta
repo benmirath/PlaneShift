@@ -1,0 +1,175 @@
+fileFormatVersion: 2
+guid: e1c3a589b0d234b809eddf79e431d4ea
+timeCreated: 1449687638
+licenseType: Free
+ModelImporter:
+  serializedVersion: 18
+  fileIDToRecycleName:
+    100000: base
+    100002: basin
+    100004: //RootNode
+    100006: Ceiling
+    100008: Column1
+    100010: Column2
+    100012: Column3
+    100014: Column4
+    100016: Column5
+    100018: Floor
+    100020: FloorEmbellishment
+    100022: FloorEmbellishment1
+    100024: group1
+    100026: Room
+    100028: Torch
+    100030: Wall
+    100032: Ceiling 1
+    100034: Columns
+    100036: Floor 1
+    100038: Floor_Embellishment
+    100040: pasted__Floor
+    100042: pasted__WallSupport3
+    100044: pSphere1
+    100046: WallSupport
+    400000: base
+    400002: basin
+    400004: //RootNode
+    400006: Ceiling
+    400008: Column1
+    400010: Column2
+    400012: Column3
+    400014: Column4
+    400016: Column5
+    400018: Floor
+    400020: FloorEmbellishment
+    400022: FloorEmbellishment1
+    400024: group1
+    400026: Room
+    400028: Torch
+    400030: Wall
+    400032: Ceiling 1
+    400034: Columns
+    400036: Floor 1
+    400038: Floor_Embellishment
+    400040: pasted__Floor
+    400042: pasted__WallSupport3
+    400044: pSphere1
+    400046: WallSupport
+    2300000: base
+    2300002: basin
+    2300004: Ceiling
+    2300006: Column1
+    2300008: Column2
+    2300010: Column3
+    2300012: Column4
+    2300014: Column5
+    2300016: Floor
+    2300018: FloorEmbellishment
+    2300020: FloorEmbellishment1
+    2300022: Wall
+    2300024: Ceiling 1
+    2300026: Floor 1
+    2300028: Floor_Embellishment
+    2300030: pasted__Floor
+    2300032: pasted__WallSupport3
+    2300034: pSphere1
+    2300036: WallSupport
+    3300000: base
+    3300002: basin
+    3300004: Ceiling
+    3300006: Column1
+    3300008: Column2
+    3300010: Column3
+    3300012: Column4
+    3300014: Column5
+    3300016: Floor
+    3300018: FloorEmbellishment
+    3300020: FloorEmbellishment1
+    3300022: Wall
+    3300024: Ceiling 1
+    3300026: Floor 1
+    3300028: Floor_Embellishment
+    3300030: pasted__Floor
+    3300032: pasted__WallSupport3
+    3300034: pSphere1
+    3300036: WallSupport
+    4300000: Floor
+    4300002: Ceiling
+    4300004: Column1
+    4300006: Column2
+    4300008: Column3
+    4300010: Column4
+    4300012: Column5
+    4300014: base
+    4300016: basin
+    4300018: Wall
+    4300020: FloorEmbellishment
+    4300022: FloorEmbellishment1
+    4300024: Floor_Embellishment
+    4300026: pasted__Floor
+    4300028: pSphere1
+    4300030: WallSupport
+    4300032: pasted__WallSupport3
+    9500000: //RootNode
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    optimizeGameObjects: 0
+    motionNodeName: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    animationCompression: 1
+    animationRotationError: .5
+    animationPositionError: .5
+    animationScaleError: .5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    importBlendShapes: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    splitTangentsAcrossUV: 1
+    normalImportMode: 0
+    tangentImportMode: 1
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    human: []
+    skeleton: []
+    armTwist: .5
+    foreArmTwist: .5
+    upperLegTwist: .5
+    legTwist: .5
+    armStretch: .0500000007
+    legStretch: .0500000007
+    feetSpacing: 0
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 2
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

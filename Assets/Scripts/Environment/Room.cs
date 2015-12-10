@@ -42,7 +42,7 @@ public class Room : MonoBehaviour {
 	void OnEntranceTriggered (RoomEntranceTrigger trigger) {
 		Debug.LogError ("PLAYER HIT");
 		//load next room
-		LoadNextRoom ();
+		// LoadNextRoom ();
 		//if not gallery or beach, trigger room activation
 		//if indoors, unlock previous room
 
@@ -60,59 +60,59 @@ public class Room : MonoBehaviour {
 	}
 
 	//call after room entrance has been triggered
-	void LoadNextRoom () {
-		//choose room type (if indoor, pick outdoor, and vice versa)
+	// void LoadNextRoom () {
+	// 	//choose room type (if indoor, pick outdoor, and vice versa)
 
-		RoomType nextRoomType = (roomType == RoomType.Gallery || roomType == RoomType.TrapChamber) ? (RoomType)Random.Range (2, 5) : (RoomType)Random.Range (0, 2);		//if indoors room, select outdoors room range
-		nextRoomType = RoomType.Gallery;
+	// 	RoomType nextRoomType = (roomType == RoomType.Gallery || roomType == RoomType.TrapChamber) ? (RoomType)Random.Range (2, 5) : (RoomType)Random.Range (0, 2);		//if indoors room, select outdoors room range
+	// 	nextRoomType = RoomType.Gallery;
 
 
 
-		if (roomType == RoomType.Gallery || roomType == RoomType.TrapChamber) {	//indoors
+	// 	if (roomType == RoomType.Gallery || roomType == RoomType.TrapChamber) {	//indoors
 
-		} else {
+	// 	} else {
 		
-		}
+	// 	}
 
-		//choose room exit type (drop or portal)
-	}
+	// 	//choose room exit type (drop or portal)
+	// }
 
-	void UnloadPreviousRoom () {
-		if (prevRoom != null) {
-			prevRoom.gameObject.SetActive (false);
-		}
-	}
+	// void UnloadPreviousRoom () {
+	// 	if (prevRoom != null) {
+	// 		prevRoom.gameObject.SetActive (false);
+	// 	}
+	// }
 
-	static Object ReturnRoomPrefab (RoomType type) {
-		Object returnRoom = null;
-		switch (type) {
-		default:
-		case RoomType.Gallery:
-			Resources.Load ("Room_Gallery");
-			break;
-		case RoomType.Beach:
-			Resources.Load ("Room_Beach");
-			break;
-		}
-		return returnRoom;
-	}
+	// static Object ReturnRoomPrefab (RoomType type) {
+	// 	Object returnRoom = null;
+	// 	switch (type) {
+	// 	default:
+	// 	case RoomType.Gallery:
+	// 		Resources.Load ("Room_Gallery");
+	// 		break;
+	// 	case RoomType.Beach:
+	// 		Resources.Load ("Room_Beach");
+	// 		break;
+	// 	}
+	// 	return returnRoom;
+	// }
 
-	static List<Room> roomsObjectPool = new List<Room> ();
-	static Room SpawnRoom (Room prevRoom, RoomType type) {
-		Room returnRoom = null;
-		for (int i = 0; i < roomsObjectPool.Count; i++) {
-			if (!roomsObjectPool[i].gameObject.activeInHierarchy && roomsObjectPool[i].roomType == type) {
-				returnRoom = roomsObjectPool[i];
-				returnRoom.gameObject.SetActive (true);
-				returnRoom.transform.position = prevRoom.exitPoint;
-				break;
-			}
-		}
+	// static List<Room> roomsObjectPool = new List<Room> ();
+	// static Room SpawnRoom (Room prevRoom, RoomType type) {
+	// 	Room returnRoom = null;
+	// 	for (int i = 0; i < roomsObjectPool.Count; i++) {
+	// 		if (!roomsObjectPool[i].gameObject.activeInHierarchy && roomsObjectPool[i].roomType == type) {
+	// 			returnRoom = roomsObjectPool[i];
+	// 			returnRoom.gameObject.SetActive (true);
+	// 			returnRoom.transform.position = prevRoom.exitPoint;
+	// 			break;
+	// 		}
+	// 	}
 
-		if (returnRoom == null) {
-			returnRoom = GameObject.Instantiate (ReturnRoomPrefab(type), prevRoom.exitPoint, Quaternion.identity) as Room;
-		}
-		return returnRoom;
-	}
+	// 	if (returnRoom == null) {
+	// 		returnRoom = GameObject.Instantiate (ReturnRoomPrefab(type), prevRoom.exitPoint, Quaternion.identity) as Room;
+	// 	}
+	// 	return returnRoom;
+	// }
 
 }
