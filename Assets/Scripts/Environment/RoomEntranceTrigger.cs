@@ -1,10 +1,10 @@
 ﻿using UnityEngine;
 
-[RequireComponent(typeof(BoxCollider))]
+[System.Serializable, RequireComponent(typeof(BoxCollider))]
 public class RoomEntranceTrigger : MonoBehaviour {
 	public delegate void PlayerEnteredRoom (RoomEntranceTrigger trigger);
 	public static event PlayerEnteredRoom OnPlayerEnteredRoom;
-
+	bool triggered = false;
 	void Awake () {
 		BoxCollider coll = GetComponent<BoxCollider> ();
 		if (coll != null) {
@@ -12,10 +12,16 @@ public class RoomEntranceTrigger : MonoBehaviour {
 			coll.size = new Vector3 (20, 20, 20);
 		}
 	}
-
+	
+	void OnEnable () {
+		triggered = false;
+	}
 	void OnTriggerEnter (Collider hit) {
-		if (hit.CompareTag ("Player")) {
-			if (OnPlayerEnteredRoom != null) OnPlayerEnteredRoom (this);
+		if (!triggered && hit.CompareTag ("Player")) {
+			if (OnPlayerEnteredRoom != null) {
+				triggered = true;
+				OnPlayerEnteredRoom (this);
+			}
 		}
 	}
 }

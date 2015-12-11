@@ -16,18 +16,20 @@ public class MyGameManager : MonoBehaviour {
 
 	Controller2 player;
 	[SerializeField]Controller2 playerPrefab;
-	List<MyGameRoom> rooms;
+	public List<MyGameRoom> rooms;
 	// Use this for initialization
 	void Awake () {
 		baseRoomPool = new ObjectPool<MyGameRoom> (baseRoomPrefab);
 		wallPool = new ObjectPool<Transform> (wallPrefab);
 		doorPool = new ObjectPool<Transform> (doorPrefab);
+		bridgePool = new ObjectPool<Transform> (bridgePrefab);
 		
 		rooms = new List<MyGameRoom> ();
 		// MyGameRoom startRoom = new GameRoom (this, Vector3.zero);
 		MyGameRoom startRoom = baseRoomPool.SpawnFromPool (Vector3.zero);
 		startRoom.Initialize (this);
 		rooms.Add (startRoom);
+		// startRoom.Init
 		
 		player = Instantiate (playerPrefab, startRoom.roomPos + (Vector3.up * 5), Quaternion.identity) as Controller2;
 	}
@@ -67,12 +69,14 @@ public class MyGameManager : MonoBehaviour {
 	[SerializeField] MyGameRoom baseRoomPrefab;
 	[SerializeField] Transform wallPrefab;
 	[SerializeField] Transform doorPrefab;
+	[SerializeField] Transform bridgePrefab;
 	
 //==========================================
 //OBJECT POOLS
 //==========================================	
 	// ObjectPool<Transform> floorPool;
-	ObjectPool<MyGameRoom> baseRoomPool;
+	public ObjectPool<MyGameRoom> baseRoomPool;
 	public ObjectPool<Transform> wallPool;
 	public ObjectPool<Transform> doorPool;	
+	public ObjectPool<Transform> bridgePool;
 }
