@@ -1,22 +1,28 @@
 ﻿using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
 
 public class MyGameRoom : MonoBehaviour {
-		MyGameManager gameManager;
+		
 		public Vector3 roomPos;
 		public Transform attachmentAnchor;
 		
+		public Transform wallAnchor1;
+		public Transform wallAnchor2;
+		public Transform wallAnchor3;
+		public Transform wallAnchor4;
+		public Transform wallAnchor5;
+		
+		
+		MyGameManager gameManager;
+		MyGameRoom prevRoom;
 		RoomEntranceTrigger trigger;
 		
-		// MyGameManager
-		MyGameRoom prevRoom;
 		
 		List<int> nextRoomIndex;
 		List<MyGameRoom> nextRoom;
-		List<Transform> nextRoomBridge;
+		// List<Transform> nextRoomBridge;
 		
-		// Transform floor;
-		// Transform ceiling;
 		Transform baseRoom;
 		List<Transform> walls;
 		List<Transform> doors;
@@ -24,22 +30,14 @@ public class MyGameRoom : MonoBehaviour {
 		const int wallAngle = 72; 
 		Vector3 roomDiff = new Vector3 (0, 0, 360);
 		
-		void OnEnable () {
-			RoomEntranceTrigger.OnPlayerEnteredRoom += GenerateAdjacentRoomss;
-		}
-		void OnDisable () {
-			RoomEntranceTrigger.OnPlayerEnteredRoom -= GenerateAdjacentRoomss;
-		}
-		
 		void Awake () {
 			doors = new List<Transform> ();
 			walls = new List<Transform> ();
 			nextRoomIndex = new List<int> ();
 			nextRoom = new List<MyGameRoom> ();
-			nextRoomBridge = new List<Transform> ();
 		}
 		
-		public void Initialize (MyGameManager _game, MyGameRoom _prevRoom = null) {
+		public void Initialize (MyGameManager _game, MyGameRoom _prevRoom = null, bool _finalRoom = false) {
 			gameManager = _game;
 			prevRoom = _prevRoom;
 			roomPos = transform.position;
@@ -54,8 +52,8 @@ public class MyGameRoom : MonoBehaviour {
 			
 			//calculate doors - generate walkway and attached game rooms for each door
 			int doorCountAdj = (prevRoom != null) ? 1 : 0;
-			int doorCount = 1 + doorCountAdj;
-			// int doorCount = UnityEngine.Random.Range (0, 1) + doorCountAdj;	//increase to 2 once rest of generation is working
+			int doorCount = (_finalRoom) ?  doorCountAdj : 1 + doorCountAdj;
+
 			for (int i = 0; i < doorCount; i++) {
 				doors.Add (_game.doorPool.SpawnFromPool (roomPos));	
 			}
@@ -65,15 +63,17 @@ public class MyGameRoom : MonoBehaviour {
 			for (int i = 0; i < wallCount; i++) {
 				walls.Add (_game.wallPool.SpawnFromPool (roomPos));
 			}
-			
-			Debug.LogError (doorCount);
-			
+
+			//set wall and door orientations			
 			int wallIndex = 0;
 			int doorIndex = 0;
 			int rotation = 0;
+			int targ = UnityEngine.Random.Range (2,4);
+			
 			for (int i = 0; i < 5; i++) {
-				if (doorIndex < doorCount && (i == 0 || i == 2 || i == 3)) {	//theres a door available and its an appropriate slot
-					if (i != 0 || prevRoom == null) {
+				// if (doorIndex < doorCount && (i == 0 || i == 2 || i == 3)) {	//theres a door available and its an appropriate slot
+				if (doorIndex < doorCount && (i == 0 || i == targ)) {	//theres a door available and its an appropriate slot
+					if (!_finalRoom && (i != 0 || prevRoom == null)) {
 						nextRoomIndex.Add (i);
 					}
 					doors[doorIndex].parent = attachmentAnchor;
@@ -87,138 +87,52 @@ public class MyGameRoom : MonoBehaviour {
 				rotation += wallAngle;
 			}
 			
-			if (prevRoom == null) {
-				InitializeConnections ();
-				Debug.LogWarning("Intizlization wrapup");
+			transform.name += gameManager.rooms.Count;
+			
+			if (prevRoom != null) {
+				transform.transform.LookAt (prevRoom.transform, Vector3.up);
+				
+				Vector3 offset = new Vector3 (0, -18, 0);
+				transform.eulerAngles = transform.transform.eulerAngles + offset;
 			}
-			
-			
-			
-			 
-			
-			
-			// Vector3 floorPos = pos;
-			// floor = game.floorPool.SpawnFromPool();
-			
-			// Vector3 ceilingPos = pos + new Vector3 (0, 5, 0);
-			// ceiling = game.ceilingPool.SpawnFromPool();
-			
-			
-			
-			//doors
-			// doors = new List<Transform> ();			
-			// int doorCountAdj = (prevRoom != null) ? 1 : 0;
-			// int doorCount = UnityEngine.Random.Range (0, 2) + doorCountAdj;
-			
-			// for (int i = 0; i < doorCount; i++) {
-			// 	doors.Add (game.doorPool.SpawnFromPool ());			
-			// }			 	
-			
-			RoomEntranceTrigger.OnPlayerEnteredRoom += GenerateAdjacentRoomss;
+			InitializeConnections ();
 		}
 		
 		bool roomInitialized = false;
-		static float roomRot = 180;
+		const float roomRot = 180;
+		const float roomAngOffset = 18;
+		int roomState = 0;
 		void InitializeConnections () {
 			if (roomInitialized) return;
+			
 			roomInitialized = true;
+			gameManager.rooms.Add (this);
 			Debug.LogWarning ("Starting Build");
 			for (int i = 0; i < nextRoomIndex.Count; i++) {
 				Debug.LogWarning ("Loop Count: " + i);
 				Transform bridge = gameManager.bridgePool.SpawnFromPool (roomPos);
-				
-				// Vector3 adj = (prevRoom == null) ? Vector3.zero : transform.eulerAngles;
-				// Vector3 adj = (prevRoom == null) ? Vector3.zero : new Vector3 (0, transform.eulerAngles.y, 0);
-				
-				// Vector3 adj = (prevRoom == null) ? transform.eulerAngles : transform.eulerAngles + prevRoom.transform.eulerAngles;
-				// float adj = (prevRoom == null) ? 0 : prevRoom.transform.eulerAngles.y;
-				
-				// float adj = 18 * gameManager.rooms.Count;
-				// float adj = 0;
-				// float adj = (36 + 180) * Mathf.Max (0, gameManager.rooms.Count - 2);
-				// if (prevRoom != null) {
-					// if (prevRoom.prevRoom != null) {
-						// adj = prevRoom.transform.eulerAngles.y + 18;
-					// } else {
-						// adj = prevRoom.transform.eulerAngles.y;
-					// }
-				// }
-				
-				float adj = (gameManager.rooms.Count > 2) ? 180 : 0;
-				// float adj = 0;
-				if (gameManager.rooms.Count > 2) {
-					// adj = 180;
-					adj = 180 + 36;
+		
+				bridge.eulerAngles = transform.eulerAngles + new Vector3 (0, (wallAngle * nextRoomIndex[i]), 0);
+				Renderer bridgeRend = bridge.GetComponentInChildren<Renderer> ();
+				if (bridgeRend != null) {
+					bridgeRend.material = MyGameManager.state.bridgeMat;
 				}
-				// bridge.eulerAngles = new Vector3 (0, transform.eulerAngles.y + (wallAngle * nextRoomIndex[i]), 0);
-				// bridge.eulerAngles = adj + new Vector3 (0, wallAngle * nextRoomIndex[i], 0);
-				Debug.Log (gameObject.GetInstanceID() + ": " + nextRoomIndex[i]);
-				
-				bridge.eulerAngles = transform.eulerAngles + new Vector3 (0, adj + (wallAngle * nextRoomIndex[i]), 0);
+				// 	Debug.LogWarning ("Changing Bridge Material");
+					
+				// 	if (gameManager.bridgeMaterials.Length > 1) {	//make sure there's enough to warrant the random sort
+				// 		int selection = UnityEngine.Random.Range(0, gameManager.bridgeMaterials.Length);
+				// 		while (selection == gameManager.previousBridgeIndex) { selection = UnityEngine.Random.Range(0, gameManager.bridgeMaterials.Length); }
+						
+				// 		bridgeRend.material = gameManager.bridgeMaterials[selection];
+				// 		gameManager.previousBridgeIndex = selection;	
+				// 	}
+				// }
 				
 				MyGameRoom newRoom = gameManager.baseRoomPool.SpawnFromPool (roomPos + roomDiff);
 				nextRoom.Add (newRoom);
 				
-				
-				// newRoom.transform.RotateAround (roomPos, Vector3.up,  wallAngle * nextRoomIndex[i]);
-				newRoom.transform.RotateAround (roomPos, Vector3.up, 18 + adj + transform.eulerAngles.y + (wallAngle * nextRoomIndex[i]));
-				// newRoom.transform.eulerAngles = adj + (Vector3.up * transform.eulerAngles.y);
-				newRoom.transform.eulerAngles = Vector3.up * (transform.eulerAngles.y + roomRot);
-				newRoom.Initialize (gameManager, this);
-				// roomRot += 180;				
+				newRoom.transform.RotateAround (roomPos, Vector3.up, 18 + transform.eulerAngles.y + (wallAngle * nextRoomIndex[i]));
+				newRoom.Initialize (gameManager, this, gameManager.rooms.Count >= gameManager.curRoomCount);				
 			}
-			
-			gameManager.rooms.Add (this);
 		}
-		// ~GameRoom () {
-		// 	RoomEntranceTrigger.OnPlayerEnteredRoom -= GenerateAdjacentRoomss;
-		// }
-		
-		public void SetRoomMaterials () {
-			
-		}
-		
-		public void GenerateAdjacentRoomss (RoomEntranceTrigger activatedTrigger) {
-			if (activatedTrigger != trigger) return;
-			
-			Debug.LogWarning ("Player detected in room, generating next rooms!");
-			
-			// for (int i = 0; i < nextRoomIndex.Count; i++) {
-			// 	Transform bridge = gameManager.bridgePool.SpawnFromPool (roomPos);
-			// 	bridge.eulerAngles = new Vector3 (0, wallAngle * nextRoomIndex[i], 0);
-				
-			// 	// Vector3 dir = Mathf.
-				
-			// 	MyGameRoom newRoom = gameManager.baseRoomPool.SpawnFromPool (roomPos + roomDiff);
-				
-			// 	// newRoom.transform.RotateAround (roomPos, Vector3.up,  wallAngle * nextRoomIndex[i]);
-			// 	newRoom.transform.RotateAround (roomPos, Vector3.up,  18 + (wallAngle * nextRoomIndex[i]));
-			// }
-			
-			
-			if (nextRoom.Count > 0) {
-				for (int i = 0; i < nextRoom.Count; i++) {
-					Debug.LogWarning (i);
-					// nextRoom[i].GenerateAdjacentRoomss2 ();
-					nextRoom[i].InitializeConnections ();
-				}
-			}
-			
-			// MyGameRoom newRoom
-			
-		}
-		public void GenerateAdjacentRoomss2 () {
-			// for (int i = 0; i < nextRoomIndex.Count; i++) {
-			// 	Transform bridge = gameManager.bridgePool.SpawnFromPool (roomPos);
-			// 	bridge.eulerAngles = new Vector3 (0, wallAngle * nextRoomIndex[i], 0);
-				
-			// 	// Vector3 dir = Mathf.
-				
-			// 	MyGameRoom newRoom = gameManager.baseRoomPool.SpawnFromPool (roomPos + roomDiff);
-				
-			// 	// newRoom.transform.RotateAround (roomPos, Vector3.up,  wallAngle * nextRoomIndex[i]);
-			// 	newRoom.transform.RotateAround (roomPos, Vector3.up,  18 + (wallAngle * nextRoomIndex[i]));
-			// }
-		}
-		
 	}
