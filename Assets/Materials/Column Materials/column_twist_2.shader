@@ -1,16 +1,18 @@
-﻿Shader "Custom/column_twist_1" {
+﻿Shader "Custom/Column/column_twist_2" {
 	Properties {
 		_Color ("Color", Color) = (1,1,1,1)
 		_MainTex ("Albedo (RGB)", 2D) = "white" {}
 		_TwistAmount ("Rotation", Float) = 5
 		_AnimSpeed ("Animation Speed", Float) = 0
+		_Subdivide ("Sub Divide", Int) = 20	 
 	}
 	SubShader {
-		Tags { "RenderType"="Opaque" }
+		// Tags { "RenderType"="Opaque" }
+		Tags { "Queue"="Transparent" "RenderType"="Transparent" }
 		LOD 200
 		
 		CGPROGRAM
-		#pragma surface surf Standard fullforwardshadows vertex:vert
+		#pragma surface surf Standard fullforwardshadows vertex:vert alpha
 		#pragma target 3.0
 		
 		fixed4 DoTwist( fixed4 pos, fixed t ) {
@@ -30,6 +32,7 @@
 		sampler2D _MainTex;
 		fixed _TwistAmount;
 		fixed _AnimSpeed;
+		int _Subdivide;
 
 		struct Input {
 			float2 uv_MainTex;
@@ -45,10 +48,12 @@
 		void surf (Input IN, inout SurfaceOutputStandard o) {
 			fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
 			fixed2 st = IN.uv_MainTex;
-			o.Albedo = (fmod (floor (st.x * 100), 2) == 0) ? fixed3(1,1,1) : c.rgb;
+			bool isTransparent = fmod (floor (st.x * _Subdivide), 2) == 0;
+			o.Albedo = (isTransparent) ? fixed3(1,1,1) : c.rgb;
+			o.Emission = o.Albedo;
 			o.Metallic = 0;
 			o.Smoothness = 0;
-			o.Alpha = c.a;
+			o.Alpha = (isTransparent) ? 0 : c.a;
 		}
 		ENDCG
 	} 

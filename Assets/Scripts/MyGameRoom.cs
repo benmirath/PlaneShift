@@ -13,6 +13,7 @@ public class MyGameRoom : MonoBehaviour {
 		public Transform wallAnchor4;
 		public Transform wallAnchor5;
 		
+		[SerializeField] Renderer[] columnRenderers;
 		
 		MyGameManager gameManager;
 		MyGameRoom prevRoom;
@@ -21,7 +22,6 @@ public class MyGameRoom : MonoBehaviour {
 		
 		List<int> nextRoomIndex;
 		List<MyGameRoom> nextRoom;
-		// List<Transform> nextRoomBridge;
 		
 		Transform baseRoom;
 		List<Transform> walls;
@@ -29,6 +29,10 @@ public class MyGameRoom : MonoBehaviour {
 		
 		const int wallAngle = 72; 
 		Vector3 roomDiff = new Vector3 (0, 0, 360);
+		
+		void OnDisable () {
+			roomInitialized = false;
+		}
 		
 		void Awake () {
 			doors = new List<Transform> ();
@@ -44,11 +48,13 @@ public class MyGameRoom : MonoBehaviour {
 			baseRoom = transform;			
 			trigger = baseRoom.gameObject.AddComponent<RoomEntranceTrigger> ();
 			
+			//previous room cleanup
 			roomInitialized = false;
-			while (attachmentAnchor.childCount > 0) {
-				attachmentAnchor.GetChild (0).gameObject.SetActive (false);
-				attachmentAnchor.GetChild (0).parent = null;
-			}
+			
+			// while (attachmentAnchor.childCount > 0) {
+			// 	attachmentAnchor.GetChild (0).gameObject.SetActive (false);
+			// 	attachmentAnchor.GetChild (0).parent = null;
+			// }
 			
 			//calculate doors - generate walkway and attached game rooms for each door
 			int doorCountAdj = (prevRoom != null) ? 1 : 0;
@@ -87,6 +93,25 @@ public class MyGameRoom : MonoBehaviour {
 				rotation += wallAngle;
 			}
 			
+			// if (prevRoom != null && !_finalRoom) {
+				Transform decal = gameManager.decalPool[UnityEngine.Random.Range (0, gameManager.decalPool.Count)].SpawnFromPool();
+				decal.parent = attachmentAnchor;
+				decal.localPosition = new Vector3 (0, 2, 0);
+								
+				int roomType = UnityEngine.Random.Range (0, 5);
+				if (roomType >= 4) {
+					
+				} else if (roomType >= 3) {
+					
+				}	
+			// }
+			
+			//Column Customization
+			for (int j = 0; j < columnRenderers.Length; j++) {
+				columnRenderers[j].material = MyGameManager.state.columnMat;
+			}
+			
+			
 			transform.name += gameManager.rooms.Count;
 			
 			if (prevRoom != null) {
@@ -117,16 +142,6 @@ public class MyGameRoom : MonoBehaviour {
 				if (bridgeRend != null) {
 					bridgeRend.material = MyGameManager.state.bridgeMat;
 				}
-				// 	Debug.LogWarning ("Changing Bridge Material");
-					
-				// 	if (gameManager.bridgeMaterials.Length > 1) {	//make sure there's enough to warrant the random sort
-				// 		int selection = UnityEngine.Random.Range(0, gameManager.bridgeMaterials.Length);
-				// 		while (selection == gameManager.previousBridgeIndex) { selection = UnityEngine.Random.Range(0, gameManager.bridgeMaterials.Length); }
-						
-				// 		bridgeRend.material = gameManager.bridgeMaterials[selection];
-				// 		gameManager.previousBridgeIndex = selection;	
-				// 	}
-				// }
 				
 				MyGameRoom newRoom = gameManager.baseRoomPool.SpawnFromPool (roomPos + roomDiff);
 				nextRoom.Add (newRoom);
@@ -134,5 +149,29 @@ public class MyGameRoom : MonoBehaviour {
 				newRoom.transform.RotateAround (roomPos, Vector3.up, 18 + transform.eulerAngles.y + (wallAngle * nextRoomIndex[i]));
 				newRoom.Initialize (gameManager, this, gameManager.rooms.Count >= gameManager.curRoomCount);				
 			}
+		}
+		
+		public void ClearRoom () {
+			// while (attachmentAnchor.childCount > 0) {
+			nextRoom.Clear ();
+			nextRoomIndex.Clear ();
+			doors.Clear ();
+			walls.Clear ();
+				
+			for (int i = 0; i < attachmentAnchor.childCount; i++) {
+				attachmentAnchor.GetChild (i).gameObject.SetActive (false);
+				// attachmentAnchor.GetChild (0).parent = null;
+				// attachmentAnchor.chi
+			}
+			attachmentAnchor.DetachChildren ();
+			// StartCoroutine (selfDeactivate ());
+			gameObject.SetActive (false);
+		}
+		
+		IEnumerator selfDeactivate () {
+			Debug.LogError ("Off1");
+			yield return new WaitForEndOfFrame ();
+			Debug.LogError ("Off2");
+			gameObject.SetActive (false);	
 		}
 	}

@@ -29,47 +29,87 @@ public class MyGameManager : MonoBehaviour {
 		wallPool = new ObjectPool<Transform> (wallPrefab);
 		doorPool = new ObjectPool<Transform> (doorPrefab);
 		bridgePool = new ObjectPool<Transform> (bridgePrefab);
+		decalPool = new List<ObjectPool<Transform>> ();
+		rooms = new List<MyGameRoom> ();
+		for (int i = 0; i < centerDecalPrefabs.Length; i++) {
+			decalPool.Add (new ObjectPool<Transform> (centerDecalPrefabs[i])); 	
+		}
+		
 		
 		skybox = RenderSettings.skybox;
-		
-		
 		GenerateScene ();
-		
-		// DynamicGI.UpdateEnvironment ();
-		
-		// var skybox = Light
 	}
 	
 	
 	void Update () {
 		sun.transform.Rotate (state.sunMoveSpeed * Time.deltaTime, 0, 0);
+		
+		if (Input.GetKeyDown (KeyCode.R)) {
+			Debug.LogError (rooms.Count);
+			ClearScene ();
+			Debug.LogError (rooms.Count);
+			
+			GenerateScene ();
+		}
+		if (deactivate) {
+			deactivate = false;
+			// rooms[0].gameObject.SetActive (false);
+		}
 	}
+	
+	bool deactivate = false;
 	
 	void GenerateScene () {
 		curRoomCount = UnityEngine.Random.Range (roomNumMin, roomNumMax + 1);
-		Debug.LogWarning (curRoomCount);
-		rooms = new List<MyGameRoom> ();
-		
+		// Debug.LogWarning (curRoomCount);		
 		SetWorldState ();
 		
 		MyGameRoom startRoom = baseRoomPool.SpawnFromPool (Vector3.zero);
 		startRoom.Initialize (this);
 		
 		if (player == null) {
-			player = Instantiate (playerPrefab, startRoom.roomPos + (Vector3.up * 6), Quaternion.identity) as Controller2;
+			player = Instantiate (playerPrefab, startRoom.roomPos + new Vector3 (-10, 16, -30), Quaternion.identity) as Controller2;
 		} else {
-			player.transform.position = startRoom.roomPos + (Vector3.up * 6);
+			player.transform.position = startRoom.roomPos + new Vector3 (-10, 16, -30);
 			player.transform.rotation = Quaternion.identity;
 		}
 		
+	}
+	void GenerateScene2 () {
+		curRoomCount = UnityEngine.Random.Range (roomNumMin, roomNumMax + 1);
+		// Debug.LogWarning (curRoomCount);		
+		SetWorldState ();
+		
+		MyGameRoom startRoom = baseRoomPool.SpawnFromPool2 (Vector3.zero);
+		startRoom.Initialize (this);
+		
+		// if (player == null) {
+		// 	player = Instantiate (playerPrefab, startRoom.roomPos + new Vector3 (-10, 16, -30), Quaternion.identity) as Controller2;
+		// } else {
+		// 	player.transform.position = startRoom.roomPos + new Vector3 (-10, 16, -30);
+		// 	player.transform.rotation = Quaternion.identity;
+		// }
+		
+	}
+	void ClearScene () {
+		for (int i = 0; i < rooms.Count; i++) {
+			rooms[i].ClearRoom ();
+			// rooms[i].gameObject.SetActive (false);
+		}
+		Debug.LogError ("Clearing");
+		// rooms[0].gameObject.SetActive (false);
+		rooms.Clear ();
+		// 
+		// baseRoomPool.DeactivatePool ();
+		// baseRoomPool.DeactivatePool ();
+		bridgePool.DeactivatePool ();
 	}
 	
 	void SetWorldState () {
 		Material newBridgeMat = bridgeMaterials[UnityEngine.Random.Range (0, bridgeMaterials.Length)];
 		Material newColumnMat = columnMaterials[UnityEngine.Random.Range (0, columnMaterials.Length)];
 		Transform newRoomPrefab = roomPrefabs[UnityEngine.Random.Range (0, roomPrefabs.Length)];
-		
-		// float atmoIntensity = (UnityEngine.Random.Range (0, 5) == 4) ? UnityEngine.Random.Range (0,)
+	
 		float atmoIntensity = 0;
 		int atmoType = UnityEngine.Random.Range (0, 9);	//no atmo, low atmo, super atmo
 		if (atmoType <= 4) {
@@ -77,7 +117,8 @@ public class MyGameManager : MonoBehaviour {
 		} else if (atmoType <= 7) {
 			atmoIntensity = UnityEngine.Random.Range (2.5f, 4f);
 		} 
-		// if (UnityEngine.Random.ran) 
+		skybox.SetFloat ("_AtmosphereThickness", atmoIntensity);
+		
 		float sunSpeed = UnityEngine.Random.Range (sunSpeedMin, sunSpeedMax);
 		float sunSize = UnityEngine.Random.Range (sunSizeMin, sunSizeMax);
 		skybox.SetFloat ("_SunSize", sunSize);
@@ -107,14 +148,17 @@ public class MyGameManager : MonoBehaviour {
 	public ObjectPool<Transform> wallPool;
 	public ObjectPool<Transform> doorPool;	
 	public ObjectPool<Transform> bridgePool;
+	public List<ObjectPool<Transform>> decalPool;
 	
 //==========================================
 //MATERIALS
 //==========================================
 	[Header("Generation Materials")]
 	public Transform[] roomPrefabs;
+	public Transform[] centerDecalPrefabs;
 	public Material[] bridgeMaterials;
 	public Material[] columnMaterials;
+	
 	// public Material[] 
 	
 	
