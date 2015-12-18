@@ -34,6 +34,7 @@ public class MyGameRoom : MonoBehaviour {
 		public Transform attachmentAnchor;
 		
 		[SerializeField] Renderer[] columnRenderers;
+		[SerializeField] Renderer[] groundRenderers;
 		
 		MyGameManager gameManager;
 		MyGameRoom prevRoom;
@@ -77,6 +78,11 @@ public class MyGameRoom : MonoBehaviour {
 			
 			//previous room cleanup
 			roomInitialized = false;
+			
+			// Texture tex = gameManager.floorTexs[UnityEngine.Random.Range (0, gameManager.floorTexs.Length)];
+			for (int i = 0; i < groundRenderers.Length; i++) {
+				groundRenderers[i].material.SetTexture ("_MainTex", MyGameManager.state.wallTex);
+			}
 			
 			bool roofless = (MyGameManager.state.roomTypeData.ceilingType == RoomCeilingType.None || MyGameManager.state.roomTypeData.ceilingType == RoomCeilingType.Open);
 			//generate floor 
@@ -125,12 +131,22 @@ public class MyGameRoom : MonoBehaviour {
 					if (!roofless) {
 						doors[doorIndex].parent = attachmentAnchor;
 						doors[doorIndex].eulerAngles = new Vector3 (0, doors[doorIndex].parent.eulerAngles.y + rotation, 0);
+						Renderer[] rend = doors[doorIndex].GetComponentsInChildren<Renderer> ();
+						// if (rend != null) {
+						for (int j = 0; j < rend.Length; i++) {
+							rend[j].material.SetTexture ("_MainTex", MyGameManager.state.wallTex);
+						}
 					}
 					doorIndex++;	
 				} else {
 					if (!roofless) {
 						walls[wallIndex].parent = attachmentAnchor;
 						walls[wallIndex].eulerAngles = new Vector3 (0, walls[wallIndex].parent.eulerAngles.y + rotation, 0);
+						Renderer[] rend = walls[wallIndex].GetComponentsInChildren<Renderer> ();
+						// if (rend != null) {
+						for (int j = 0; j < rend.Length; i++) {
+							rend[j].material.SetTexture ("_MainTex", MyGameManager.state.wallTex);
+						}
 					}
 					wallIndex++;	
 				}

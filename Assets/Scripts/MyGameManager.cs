@@ -202,7 +202,7 @@ public class MyGameManager : MonoBehaviour {
 		values = Enum.GetValues (typeof(MyGameRoom.RoomCeilingType));
 		MyGameRoom.RoomCeilingType _ceilingType = (MyGameRoom.RoomCeilingType)values.GetValue (UnityEngine.Random.Range(0, values.Length));
 
-		state = new WorldState ( newBridgeMat, newColumnMat, sunSize, sunSpeed, color, new MyGameRoom.RoomData (_floorType, _ceilingType) );
+		state = new WorldState ( newBridgeMat, newColumnMat, floorTexs[UnityEngine.Random.Range (0, floorTexs.Length)], wallTexs[UnityEngine.Random.Range (0, wallTexs.Length)], sunSize, sunSpeed, color, new MyGameRoom.RoomData (_floorType, _ceilingType) );
 	}
 	
 //==========================================
@@ -234,6 +234,8 @@ public class MyGameManager : MonoBehaviour {
 	[Header("Generation Materials")]	
 	public Material[] bridgeMaterials;
 	public Material[] columnMaterials;	
+	public Texture[] wallTexs;
+	public Texture[] floorTexs;
 	
 		
 //==========================================
@@ -303,14 +305,19 @@ public class MyGameManager : MonoBehaviour {
 		// bool 
 		public Material bridgeMat;
 		public Material columnMat;
+		public Texture floorTex;
+		public Texture wallTex;
+		
 		// public Transform roomPrefab;
 		public float sunSize;
 		public float sunMoveSpeed;
 		public WorldColors colors;
 		public MyGameRoom.RoomData roomTypeData;
-		public WorldState (Material _bridgeMat, Material _columnMat, float _sunSize, float _sunMoveSpeed, WorldColors _colors, MyGameRoom.RoomData _roomTypeData) {
+		public WorldState (Material _bridgeMat, Material _columnMat, Texture _floorTex, Texture _wallTex, float _sunSize, float _sunMoveSpeed, WorldColors _colors, MyGameRoom.RoomData _roomTypeData) {
 			bridgeMat = _bridgeMat;
 			columnMat = _columnMat;
+			floorTex = _floorTex;
+			wallTex = _wallTex;
 			// roomPrefab = _roomPrefab;
 			sunSize = _sunSize;
 			sunMoveSpeed = _sunMoveSpeed;
