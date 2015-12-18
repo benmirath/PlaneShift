@@ -3,15 +3,35 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class MyGameRoom : MonoBehaviour {
+		//floor - no spike, spike
+		//ceiling - no ceiling, open ceiling (enclosing cicle), full ceiling, domed ceiling 
+		//columns(if ceiling) - normal, spiked (static and animated), twist (static and animated), pulsing (static and animated)
 		
-		public Vector3 roomPos;
+		public enum RoomFloorType {
+			Ungarnished,
+			Spike,
+			Dome
+		}
+		public enum RoomCeilingType {
+			None,
+			Open,
+			Closed,
+			Spike,
+			Dome
+		}
+		
+		
+		public struct RoomData {
+			public RoomFloorType floorType;
+			public RoomCeilingType ceilingType;
+			
+			public RoomData (RoomFloorType _floorType, RoomCeilingType _ceilingType) {
+				floorType = _floorType;
+				ceilingType = _ceilingType;
+			}
+		}
+		
 		public Transform attachmentAnchor;
-		
-		public Transform wallAnchor1;
-		public Transform wallAnchor2;
-		public Transform wallAnchor3;
-		public Transform wallAnchor4;
-		public Transform wallAnchor5;
 		
 		[SerializeField] Renderer[] columnRenderers;
 		
@@ -27,6 +47,7 @@ public class MyGameRoom : MonoBehaviour {
 		List<Transform> walls;
 		List<Transform> doors;
 		
+		Vector3 roomPos;
 		const int wallAngle = 72; 
 		Vector3 roomDiff = new Vector3 (0, 0, 360);
 		
@@ -41,6 +62,12 @@ public class MyGameRoom : MonoBehaviour {
 			nextRoom = new List<MyGameRoom> ();
 		}
 		
+		void AttachObject (Transform _attach, bool _rotationReset = false) {
+			_attach.parent = attachmentAnchor;
+			_attach.localPosition = Vector3.zero;
+			if (_rotationReset) _attach.localRotation = Quaternion.identity;
+		}
+		
 		public void Initialize (MyGameManager _game, MyGameRoom _prevRoom = null, bool _finalRoom = false) {
 			gameManager = _game;
 			prevRoom = _prevRoom;
@@ -51,23 +78,37 @@ public class MyGameRoom : MonoBehaviour {
 			//previous room cleanup
 			roomInitialized = false;
 			
-			// while (attachmentAnchor.childCount > 0) {
-			// 	attachmentAnchor.GetChild (0).gameObject.SetActive (false);
-			// 	attachmentAnchor.GetChild (0).parent = null;
-			// }
+			bool roofless = (MyGameManager.state.roomTypeData.ceilingType == RoomCeilingType.None || MyGameManager.state.roomTypeData.ceilingType == RoomCeilingType.Open);
+			//generate floor 
+			if (MyGameManager.state.roomTypeData.floorType == RoomFloorType.Dome) {
+				AttachObject (gameManager.floorDomePool.SpawnFromPool ());
+			} else if (MyGameManager.state.roomTypeData.floorType == RoomFloorType.Spike) {
+				AttachObject (gameManager.floorSpikePool.SpawnFromPool ());
+			}			
+			
 			
 			//calculate doors - generate walkway and attached game rooms for each door
 			int doorCountAdj = (prevRoom != null) ? 1 : 0;
 			int doorCount = (_finalRoom) ?  doorCountAdj : 1 + doorCountAdj;
 
-			for (int i = 0; i < doorCount; i++) {
-				doors.Add (_game.doorPool.SpawnFromPool (roomPos));	
-			}
-			
-			//generate walls
-			int wallCount = 5 - doorCount;
-			for (int i = 0; i < wallCount; i++) {
-				walls.Add (_game.wallPool.SpawnFromPool (roomPos));
+			if (!roofless) {
+				if (MyGameManager.state.roomTypeData.ceilingType == RoomCeilingType.Spike) {
+					AttachObject (gameManager.ceilingSpikePool.SpawnFromPool (), true);
+				} else if (MyGameManager.state.roomTypeData.ceilingType == RoomCeilingType.Dome) {
+					AttachObject (gameManager.ceilingDomePool.SpawnFromPool (), true);
+				} else {
+					AttachObject (gameManager.ceilingClosedPool.SpawnFromPool (), true);
+				}
+				
+				for (int i = 0; i < doorCount; i++) {
+					doors.Add (_game.doorPool.SpawnFromPool (roomPos));	
+				}
+				
+				//generate walls
+				int wallCount = 5 - doorCount;
+				for (int i = 0; i < wallCount; i++) {
+					walls.Add (_game.wallPool.SpawnFromPool (roomPos));
+				}	
 			}
 
 			//set wall and door orientations			
@@ -77,26 +118,48 @@ public class MyGameRoom : MonoBehaviour {
 			int targ = UnityEngine.Random.Range (2,4);
 			
 			for (int i = 0; i < 5; i++) {
-				// if (doorIndex < doorCount && (i == 0 || i == 2 || i == 3)) {	//theres a door available and its an appropriate slot
 				if (doorIndex < doorCount && (i == 0 || i == targ)) {	//theres a door available and its an appropriate slot
 					if (!_finalRoom && (i != 0 || prevRoom == null)) {
 						nextRoomIndex.Add (i);
 					}
-					doors[doorIndex].parent = attachmentAnchor;
-					doors[doorIndex].eulerAngles = new Vector3 (0, doors[doorIndex].parent.eulerAngles.y + rotation, 0);
+					if (!roofless) {
+						doors[doorIndex].parent = attachmentAnchor;
+						doors[doorIndex].eulerAngles = new Vector3 (0, doors[doorIndex].parent.eulerAngles.y + rotation, 0);
+					}
 					doorIndex++;	
 				} else {
-					walls[wallIndex].parent = attachmentAnchor;
-					walls[wallIndex].eulerAngles = new Vector3 (0, walls[wallIndex].parent.eulerAngles.y + rotation, 0);
+					if (!roofless) {
+						walls[wallIndex].parent = attachmentAnchor;
+						walls[wallIndex].eulerAngles = new Vector3 (0, walls[wallIndex].parent.eulerAngles.y + rotation, 0);
+					}
 					wallIndex++;	
 				}
 				rotation += wallAngle;
 			}
 			
-			// if (prevRoom != null && !_finalRoom) {
-				Transform decal = gameManager.decalPool[UnityEngine.Random.Range (0, gameManager.decalPool.Count)].SpawnFromPool();
-				decal.parent = attachmentAnchor;
-				decal.localPosition = new Vector3 (0, 2, 0);
+			if (prevRoom == null) {
+				// Transform decal = gameManager.decalPool[UnityEngine.Random.Range (0, gameManager.decalPool.Count)].SpawnFromPool();
+				// decal.parent = attachmentAnchor;
+				// decal.localPosition = new Vector3 (0, 2, 0);
+				// AttachObject (gameManager.lightPool.SpawnFromPool());
+				AttachObject (gameManager.narrativePool.SpawnFromPool());
+				
+			} else if (_finalRoom) {
+				// Transform decal = gameManager.decalPool[UnityEngine.Random.Range (0, gameManager.decalPool.Count)].SpawnFromPool();
+				AttachObject (gameManager.portalPool.SpawnFromPool());
+				// decal.parent = attachmentAnchor;
+				// decal.localPosition = new Vector3 (0, 2, 0);
+								
+			} else {
+				if (roofless) {
+					AttachObject (gameManager.torchPool.SpawnFromPool());
+					// Transform decal = gameManager.decalPool[UnityEngine.Random.Range (0, gameManager.decalPool.Count)].SpawnFromPool();
+					// decal.parent = attachmentAnchor;
+					// decal.localPosition = new Vector3 (0, 2, 0);	
+				} else {
+					AttachObject (gameManager.lightPool.SpawnFromPool());
+				}
+				
 								
 				int roomType = UnityEngine.Random.Range (0, 5);
 				if (roomType >= 4) {
@@ -104,15 +167,22 @@ public class MyGameRoom : MonoBehaviour {
 				} else if (roomType >= 3) {
 					
 				}	
-			// }
+			}
 			
+			if (roofless) {
+				for (int j = 0; j < columnRenderers.Length; j++) {
+					columnRenderers[j].gameObject.SetActive (false);
+				}	
+			} else {
 			//Column Customization
-			for (int j = 0; j < columnRenderers.Length; j++) {
-				columnRenderers[j].material = MyGameManager.state.columnMat;
+				for (int j = 0; j < columnRenderers.Length; j++) {
+					columnRenderers[j].gameObject.SetActive (true);
+					columnRenderers[j].material = MyGameManager.state.columnMat;
+				}
 			}
 			
 			
-			transform.name += gameManager.rooms.Count;
+			// transform.name += gameManager.rooms.Count;
 			
 			if (prevRoom != null) {
 				transform.transform.LookAt (prevRoom.transform, Vector3.up);

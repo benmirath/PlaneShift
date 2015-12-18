@@ -9,13 +9,15 @@
 	SubShader {
 		// Tags { "RenderType"="Opaque" }
 		Tags { "Queue"="Transparent" "RenderType"="Transparent" }
-		LOD 200
+		LOD 500	//200
 		
 		CGPROGRAM
-		#pragma surface surf Standard fullforwardshadows vertex:vert alpha
+		// #pragma surface surf Standard fullforwardshadows vertex:vert alpha
+		// #pragma surface surf Lambert vertex:vert alpha
+		#pragma surface surf Lambert vertex:vert alpha
 		#pragma target 3.0
 		
-		fixed4 DoTwist( fixed4 pos, fixed t ) {
+		fixed4 Twist( fixed4 pos, fixed t ) {
 			fixed st = sin(t);
 			fixed ct = cos(t);
 			fixed4 new_pos;
@@ -42,18 +44,20 @@
 		void vert (inout appdata_full v, out Input o) {
 			float adj = v.vertex.y * _TwistAmount;
 			adj += (_Time.y * _AnimSpeed); 
-			v.vertex = DoTwist (v.vertex, adj);
+			v.vertex = Twist (v.vertex, adj);
       	}
 
-		void surf (Input IN, inout SurfaceOutputStandard o) {
+		// void surf (Input IN, inout SurfaceOutputStandard o) {
+		void surf (Input IN, inout SurfaceOutput o) {
 			fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
 			fixed2 st = IN.uv_MainTex;
-			bool isTransparent = fmod (floor (st.x * _Subdivide), 2) == 0;
-			o.Albedo = (isTransparent) ? fixed3(1,1,1) : c.rgb;
-			o.Emission = o.Albedo;
-			o.Metallic = 0;
-			o.Smoothness = 0;
-			o.Alpha = (isTransparent) ? 0 : c.a;
+			// bool isTransparent = fmod (floor (st.x * 50), 2) == 0;
+			
+			o.Albedo = c.rgb;
+			
+			// o.Emission = o.Albedo;
+			o.Emission = 0;
+			o.Alpha = c.a;
 		}
 		ENDCG
 	} 

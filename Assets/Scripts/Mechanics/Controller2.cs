@@ -6,7 +6,8 @@ using System.Collections;
 public class Controller2: MonoBehaviour {
 	enum ControlType {
 		HookShot,
-		BombShot
+		BombShot,
+		None
 	}
 
 	Rigidbody rigid;
@@ -57,6 +58,8 @@ public class Controller2: MonoBehaviour {
 	[Header ("Bomb Shot Variables ")]
 	public Transform slowShot;
 	public Transform fastShot;
+	
+	
 
 	float curSpeed {
 		get {
@@ -113,12 +116,12 @@ public class Controller2: MonoBehaviour {
 			zSpeed = curSpeed * Input.GetAxis ("Vertical");
 			ySpeed = Physics.gravity.y;
 			
-			if (!jumping && Input.GetButtonDown ("Jump")) {
-				if (Mathf.Abs (rigid.velocity.y) < 2) {
-					jumping = true;
-				}
+			// if (!jumping && Input.GetButtonDown ("Jump")) {
+			// 	if (Mathf.Abs (rigid.velocity.y) < 2) {
+			// 		jumping = true;
+			// 	}
 				
-			}
+			// }
 			
 			if (Input.GetKeyDown (KeyCode.Tab)) {
 				if (rigid != null) {
@@ -146,5 +149,9 @@ public class Controller2: MonoBehaviour {
 			rigid.velocity = newMove;
 		}
 
+	}
+	
+	void InitNarrativeMode () {
+		
 	}
 }
