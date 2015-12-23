@@ -14,14 +14,9 @@
 		LOD 200
 		
 		CGPROGRAM
-		// #pragma surface surf Standard fullforwardshadows vertex:vert
-        // #pragma surface surf Standard vertex:vert addshadow
-		#pragma surface surf Standard fullforwardshadows vertex:vert addshadow
-		// #pragma surface surf Lambert vertex:vert addshadow
- 
+		#pragma surface surf Standard fullforwardshadows vertex:vert addshadow 
 		#pragma target 3.0
 		#define PI 3.14159265358979323846
-
 			
 		//RANDOM & NOISE
 		half random (fixed _x) { return frac(sin(_x)*100000.0); }
@@ -117,5 +112,36 @@
 		}
 		ENDCG
 	}
+	// SubShader {
+	// 	Tags { "RenderType"="Opaque" }
+	// 	LOD 200
+		
+	// 	CGPROGRAM
+	// 	#pragma surface surf Standard fullforwardshadows vertex:vert addshadow 
+	// 	#pragma target 3.0
+	// 	#define PI 3.14159265358979323846		
+		
+	// 	uniform sampler2D _MainTex;
+	// 	uniform fixed4 _Color;
+    //     uniform float _WaveHeight;
+        
+    //     struct Input {
+	// 		float2 uv_MainTex : TEXCOORD0;
+	// 		float2 uv;
+	// 	};
+	// 	void vert (inout appdata_full v, out Input o) {
+	// 			fixed4 newVerts = mul(UNITY_MATRIX_MV, v.vertex);	
+	// 			v.vertex += float4(0, sin(_Time.y - o.vertex.x + o.vertex.z) * _WaveHeight, 0, 0);			
+	// 			o.uv = TRANSFORM_UV(0);
+    //   	}
+	// 	void surf (Input IN, inout SurfaceOutputStandard o) {
+	// 		fixed2 st = IN.uv_MainTex;
+	// 		o.Albedo = tex2D(_MainTex, st);
+	// 		o.Metallic = 0;
+	// 		o.Smoothness = 0;
+	// 		o.Alpha = 1;
+	// 	}
+	// 	ENDCG
+	// }
 	FallBack "VertexLit"
 }

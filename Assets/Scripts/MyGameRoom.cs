@@ -75,7 +75,6 @@ public class MyGameRoom : MonoBehaviour {
 			roomPos = transform.position;
 			baseRoom = transform;			
 			trigger = baseRoom.gameObject.AddComponent<RoomEntranceTrigger> ();
-			
 			//previous room cleanup
 			roomInitialized = false;
 			
@@ -91,7 +90,6 @@ public class MyGameRoom : MonoBehaviour {
 			} else if (MyGameManager.state.roomTypeData.floorType == RoomFloorType.Spike) {
 				AttachObject (gameManager.floorSpikePool.SpawnFromPool ());
 			}			
-			
 			
 			//calculate doors - generate walkway and attached game rooms for each door
 			int doorCountAdj = (prevRoom != null) ? 1 : 0;
@@ -116,7 +114,6 @@ public class MyGameRoom : MonoBehaviour {
 					walls.Add (_game.wallPool.SpawnFromPool (roomPos));
 				}	
 			}
-
 			//set wall and door orientations			
 			int wallIndex = 0;
 			int doorIndex = 0;
@@ -133,7 +130,7 @@ public class MyGameRoom : MonoBehaviour {
 						doors[doorIndex].eulerAngles = new Vector3 (0, doors[doorIndex].parent.eulerAngles.y + rotation, 0);
 						Renderer[] rend = doors[doorIndex].GetComponentsInChildren<Renderer> ();
 						// if (rend != null) {
-						for (int j = 0; j < rend.Length; i++) {
+						for (int j = 0; j < rend.Length; j++) {
 							rend[j].material.SetTexture ("_MainTex", MyGameManager.state.wallTex);
 						}
 					}
@@ -144,7 +141,7 @@ public class MyGameRoom : MonoBehaviour {
 						walls[wallIndex].eulerAngles = new Vector3 (0, walls[wallIndex].parent.eulerAngles.y + rotation, 0);
 						Renderer[] rend = walls[wallIndex].GetComponentsInChildren<Renderer> ();
 						// if (rend != null) {
-						for (int j = 0; j < rend.Length; i++) {
+						for (int j = 0; j < rend.Length; j++) {
 							rend[j].material.SetTexture ("_MainTex", MyGameManager.state.wallTex);
 						}
 					}
@@ -152,7 +149,6 @@ public class MyGameRoom : MonoBehaviour {
 				}
 				rotation += wallAngle;
 			}
-			
 			if (prevRoom == null) {
 				// Transform decal = gameManager.decalPool[UnityEngine.Random.Range (0, gameManager.decalPool.Count)].SpawnFromPool();
 				// decal.parent = attachmentAnchor;
@@ -184,7 +180,6 @@ public class MyGameRoom : MonoBehaviour {
 					
 				}	
 			}
-			
 			if (roofless) {
 				for (int j = 0; j < columnRenderers.Length; j++) {
 					columnRenderers[j].gameObject.SetActive (false);

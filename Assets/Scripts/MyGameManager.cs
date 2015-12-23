@@ -5,7 +5,6 @@ using System;
 // using UnityEngine.Rendering;
 
 public class MyGameManager : MonoBehaviour {
-	
 	Controller2 player;
 	[SerializeField] AudioSource windSoundPrefab;
 	[SerializeField] NarrativeUI narrationUIPrefab;
@@ -83,6 +82,7 @@ public class MyGameManager : MonoBehaviour {
 	}
 	// Use this for initialization
 	void Awake () {
+		Cursor.visible = false;
 		baseRoomPool = new ObjectPool<MyGameRoom> (baseRoomPrefab);
 		floorDomePool = new ObjectPool<Transform> (floorDomePrefab);
 		floorSpikePool = new ObjectPool<Transform> (floorSpikePrefab);
@@ -131,11 +131,11 @@ public class MyGameManager : MonoBehaviour {
 	
 	void Update () {
 		sun.transform.Rotate (state.sunMoveSpeed * Time.deltaTime, 0, 0);		
-		if (Input.GetKeyDown (KeyCode.R)) {
-			Resources.UnloadUnusedAssets ();
-			Application.LoadLevel (Application.loadedLevel);
+		// if (Input.GetKeyDown (KeyCode.R)) {
+		// 	Resources.UnloadUnusedAssets ();
+		// 	Application.LoadLevel (Application.loadedLevel);
 			
-		}
+		// }
 		if (deactivate) {
 			deactivate = false;
 			// rooms[0].gameObject.SetActive (false);
@@ -147,10 +147,8 @@ public class MyGameManager : MonoBehaviour {
 		narrativeState++;
 		curRoomCount = UnityEngine.Random.Range (roomNumMin, roomNumMax + 1);
 		SetWorldState ();
-		
 		MyGameRoom startRoom = baseRoomPool.SpawnFromPool (Vector3.zero);
 		startRoom.Initialize (this);
-		
 		if (player == null) {
 			player = Instantiate (playerPrefab, startRoom.transform.position + new Vector3 (-10, 16, -30), Quaternion.identity) as Controller2;
 		} else {
